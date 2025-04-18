@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h3><strong>메인 페이지</strong></h3>
+<hr />
+
+<!-- 여러 카드를 담는 컨테이너 -->
+<div class="cards-container">
+  {% for book in books %}
+  <div class="card">
+    <div class="card-header">
+      {% if book.cover_image %}
+      <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+      {% else %}
+      <img src="{% static 'books/images/default_cover.jpg' %}" alt="기본 이미지">
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <!-- 제목 영역에 색상 강조 -->
+      <h6><strong>{{ book.title }}</strong></h6>
+
+      <!-- 설명/줄거리 -->
+      <p class="card-description">{{ book.description|truncatechars:80 }}</p>
+      <!-- 자세히 보기 버튼 -->
+      <a href="{% url 'books:detail' book.pk %}" class="detail-btn">Detail</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock content %}

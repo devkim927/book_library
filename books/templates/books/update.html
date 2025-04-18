@@ -1,0 +1,12 @@
+<!-- books/create.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h1><strong>도서 수정 페이지</strong></h1>
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" style="padding: 5px 10px; font-size: 14px;">Submit</button>
+</form>
+{% endblock content %}

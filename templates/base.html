@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ThRead</title>
+    {% load static %}
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <!-- 간단한 초기화 + 카드 스타일 -->
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: sans-serif;
+        line-height: 1.4;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 2rem auto;
+      }
+
+      .cards-container {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .card {
+        width: 300px;
+        background-color: #fff;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-header {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+      }
+      .card-header img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+      }
+
+      .card-body {
+        padding: 1rem;
+      }
+
+      .card-title {
+        display: inline-block;
+        margin: 0 0 0.5rem 0;
+        font-size: 0.5rem;
+        font-weight: bold;
+        color: rgb(0, 0, 0);
+        padding: 0.25rem 0.5rem;
+      }
+
+      .card-author {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 0.75rem;
+      }
+
+      .card-description {
+        font-size: 0.9rem;
+        color: #333;
+        line-height: 1.4;
+        margin-bottom: 1rem;
+      }
+
+      .detail-btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background-color: #007bff;
+        color: #ffffff;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: background-color 0.2s;
+      }
+      .detail-btn:hover {
+        background-color: #0056b3;
+      }
+
+      footer {
+        text-align: center;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        margin-top: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 내비게이션 바 -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color:rgb(0, 133, 29);">
+      <a class="navbar-brand" href="{% url 'books:index' %}">ThRead</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'books:index' %}">INDEX</a>
+          </li>
+
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'books:create' %}">CREATE</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'profile' %}">회원정보수정</a>
+            </li>
+            <li class="nav-item">
+              <form action="{% url 'login' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="nav-link btn btn-link" style="color: white; padding: 0; border: none;">LOGOUT</button>
+              </form>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">LOGIN</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'signup' %}">SIGNUP</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+
+    <!-- 메인 컨테이너 -->
+    <div class="container mt-4">
+      {% block content %}
+      {% endblock content %}
+    </div>
+
+    <!-- Bootstrap JS, Popper.js, jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
