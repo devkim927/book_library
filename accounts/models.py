@@ -10,7 +10,11 @@ class User(AbstractUser):
     yearly_goal = models.PositiveIntegerField()  # 연간 독서량
     profile_image = models.ImageField(upload_to='profiles/', blank=True, null=True)
     interests = models.CharField(max_length=100, blank=True)
-
-
+    followings = models.ManyToManyField(
+            'self',
+            symmetrical=False,
+            related_name='followers',
+            blank=True
+        )
     def __str__(self):
         return self.username

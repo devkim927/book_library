@@ -3,11 +3,15 @@ import re
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Book
-from .forms import BookForm
+from .forms import BookForm,ThreadForm
 from gtts import gTTS
 import requests  # AI API 호출을 위한 requests 모듈
 import openai
 from django.contrib.auth.decorators import login_required
+from .models import Thread  # 아직 없지만 게시글도 보여줄 예정!
+from django.http import HttpResponseForbidden
+
+
 
 
 
@@ -17,7 +21,14 @@ def index(request):
 
 def detail(request, pk):
     book = get_object_or_404(Book, pk=pk)
-    return render(request, 'books/detail.html', {'book': book})
+    threads = Thread.objects.filter(book=book).order_by('-id')  # 도서에 달린 게시글들
+    context = {
+        'book': book,
+        'threads': threads,
+    }
+    return render(request, 'books/detail.html', context)
+
+
 
 def sanitize_filename(filename):
     """
@@ -81,6 +92,7 @@ def update(request, pk):
         form = BookForm(instance=book)
     return render(request, 'books/update.html', {'form': form, 'book': book})
 
+
 def delete(request, pk):
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
@@ -124,3 +136,70 @@ def get_ai_author_data(author_name):
         print(f"OpenAI API 호출 에러: {e}")
     
     return None
+
+def thread_create(request, book_pk):
+    book = get_object_or_404(Book, pk=book_pk)
+
+    if request.method == 'POST':
+        form = ThreadForm(request.POST, request.FILES)
+        if form.is_valid():
+            thread = form.save(commit=False)
+            thread.book = book  # 직접 연결
+            thread.save()
+            return redirect('books:detail', book.pk)
+    else:
+        form = ThreadForm()
+
+    context = {'form': form, 'book': book}
+    return render(request, 'books/thread_create.html', context)
+
+def thread_detail(request, book_pk, thread_pk):
+    book = get_object_or_404(Book, pk=book_pk)
+    thread = get_object_or_404(Thread, pk=thread_pk, book=book)
+
+    context = {
+        'book': book,
+        'thread': thread,
+    }
+    return render(request, 'books/thread_detail.html', context)
+
+def thread_update(request, book_pk, thread_pk):
+    book = get_object_or_404(Book, pk=book_pk)
+    thread = get_object_or_404(Thread, pk=thread_pk, book=book)
+
+    if request.method == 'POST':
+        form = ThreadForm(request.POST, request.FILES, instance=thread)
+        if form.is_valid():
+            form.save()
+            return redirect('books:thread_detail', book.pk, thread.pk)
+    else:
+        form = ThreadForm(instance=thread)
+
+    context = {'form': form, 'book': book, 'thread': thread}
+    return render(request, 'books/thread_update.html', context)
+
+def thread_delete(request, book_pk, thread_pk):
+    book = get_object_or_404(Book, pk=book_pk)
+    thread = get_object_or_404(Thread, pk=thread_pk, book=book)
+    #
+    #  🔒 작성자만 삭제 가능하도록 체크
+    if request.user != thread.user:
+        return HttpResponseForbidden("당신은 이 글을 삭제할 권한이 없습니다.")
+
+    if request.method == 'POST':
+        thread.delete()
+        return redirect('books:detail', book.pk)
+
+    context = {'book': book, 'thread': thread}
+    return render(request, 'books/thread_delete.html', context)
+
+@login_required
+def like(request, book_pk, thread_pk):
+    thread = get_object_or_404(Thread, pk=thread_pk)
+
+    if request.user in thread.likes.all():
+        thread.likes.remove(request.user)
+    else:
+        thread.likes.add(request.user)
+
+    return redirect('books:thread_detail', book_pk, thread_pk)

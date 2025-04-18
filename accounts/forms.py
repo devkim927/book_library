@@ -1,6 +1,9 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import User
+from django.contrib.auth import get_user_model
+from django import forms
+User = get_user_model()
 
 GENRE_CHOICES = [
     ('자연', '자연'),
@@ -133,3 +136,4 @@ class CustomUserChangeForm(UserChangeForm):
         if commit:
             user.save()
         return user
+

@@ -49,4 +49,21 @@
 <p>
     <a href="{% url 'books:index' %}" class="btn" style="background-color:rgb(25, 80, 233); color: white;">BACK</a>
 </p>
+<hr>
+
+<a href="{% url 'books:thread_create' book.pk %}">Thread 작성</a>
+{% if threads %}
+  <ul>
+    {% for thread in threads %}
+      <li>
+        <a href="{% url 'books:thread_detail' book.pk thread.pk %}">
+            <strong>{{ thread.title }}</strong> - {{ thread.read_date }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+    <p>아직 스레드가 없습니다.</p>
+{% endif %}
+
 {% endblock content %}

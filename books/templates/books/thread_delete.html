@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>게시글 삭제</h1>
+  <p>정말 <strong>{{ thread.title }}</strong> 을 삭제하시겠습니까?</p>
+
+  <form method="POST">
+    {% csrf_token %}
+    <button type="submit">삭제하기</button>
+  </form>
+
+  <a href="{% url 'books:thread_detail' book.pk thread.pk %}">취소</a>
+{% endblock content %}

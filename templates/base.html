@@ -119,20 +119,21 @@
               <a class="nav-link" href="{% url 'books:create' %}">CREATE</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'profile' %}">회원정보수정</a>
+              <a class="nav-link" href="{% url 'accounts:profile' %}">회원정보수정</a>
             </li>
+      
             <li class="nav-item">
-              <form action="{% url 'login' %}" method="post" style="display:inline;">
+              <form action="{% url 'accounts:logout' %}" method="POST" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="nav-link btn btn-link" style="color: white; padding: 0; border: none;">LOGOUT</button>
               </form>
             </li>
           {% else %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'login' %}">LOGIN</a>
+              <a class="nav-link" href="{% url 'accounts:login' %}">LOGIN</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'signup' %}">SIGNUP</a>
+              <a class="nav-link" href="{% url 'accounts:signup' %}">SIGNUP</a>
             </li>
           {% endif %}
         </ul>

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ book.title }}에 대한 게시글 작성</h1>
+
+  <form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">작성 완료</button>
+  </form>
+
+  <a href="{% url 'books:detail' book.pk %}">뒤로가기</a>
+
+{% endblock content %}

@@ -11,6 +11,6 @@
     <li>연간 독서량: {{ user.yearly_goal }}</li>
     <li>관심 장르: {{ user.interests }}</li>
   </ul>
-  <a href="{% url 'update' %}">회원정보 수정</a>
-  <a href="{% url 'logout' %}">로그아웃</a>
+  <a href="{% url 'accounts:update' %}">회원정보 수정</a>
+  <a href="{% url 'accounts:logout' %}">로그아웃</a>
 {% endblock %}

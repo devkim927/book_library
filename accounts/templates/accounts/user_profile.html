@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>{{ profile_user.nickname }}님의 프로필</h2>
+  <p>이메일: {{ profile_user.email }}</p>
+  <p>가입일: {{ profile_user.date_joined }}</p>
+
+  {% if request.user != profile_user %}
+    <form action="{% url 'accounts:follow_toggle' profile_user.pk %}" method="POST">
+      {% csrf_token %}
+      {% if profile_user in request.user.following.all %}
+        <button type="submit">언팔로우</button>
+      {% else %}
+        <button type="submit">팔로우</button>
+      {% endif %}
+    </form>
+  {% endif %}
+
+  <p>팔로워 수: {{ profile_user.followers.count }}</p>
+  <p>팔로잉 수: {{ profile_user.following.count }}</p>
+
+  <a href="{% url 'books:index' %}">← 홈으로</a>
+{% endblock content %}
