@@ -2,13 +2,12 @@ import os
 import re
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Book
-from .forms import BookForm,ThreadForm
+from .models import Book, Thread, Category, Comment
+from .forms import BookForm, ThreadForm, CategoryForm, CommentForm
 from gtts import gTTS
 import requests  # AI API 호출을 위한 requests 모듈
 import openai
 from django.contrib.auth.decorators import login_required
-from .models import Thread  # 아직 없지만 게시글도 보여줄 예정!
 from django.http import HttpResponseForbidden
 
 
@@ -18,6 +17,13 @@ from django.http import HttpResponseForbidden
 def index(request):
     books = Book.objects.all()
     return render(request, 'books/index.html', {'books': books})
+
+
+def category(request):
+    categorys = Category.objects.all()
+    return render(request, 'books/category.html', {'categorys': categorys})
+
+
 
 def detail(request, pk):
     book = get_object_or_404(Book, pk=pk)
@@ -203,3 +209,73 @@ def like(request, book_pk, thread_pk):
         thread.likes.add(request.user)
 
     return redirect('books:thread_detail', book_pk, thread_pk)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+def comment_create(request, thread_pk):
+    comment = get_object_or_404(comment, pk=comment_pk)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST, request.FILES)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.thread = thread
+            comment.save()
+            return redirect('theads:detail', thread.pk)
+    else:
+        form = ThreadForm()
+
+    context = {'form': form, 'thread': thread}
+    return render(request, 'books/comment_create.html', context)
+
+def comment_detail(request, comment_pk, thread_pk):
+    therad = get_object_or_404(Thread, pk=thread_pk)
+    comment = get_object_or_404(Comment, pk=comment_pk, thread=thread)
+
+    context = {
+        'thread': thread,
+        'comment': comment,
+    }
+    return render(request, 'books/comment_detail.html', context)
+
+def comment_update(request, comment_pk, thread_pk):
+    thread = get_object_or_404(Thread, pk=thread_pk)
+    comment = get_object_or_404(Comment, pk=comment_pk, thread=thread)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST, request.FILES, instance=comment)
+        if form.is_valid():
+            form.save()
+            return redirect('books:comment_detail', comment.pk, thread.pk)
+    else:
+        form = ThreadForm(instance=thread)
+
+    context = {'form': form, 'comment': comment, 'thread': thread}
+    return render(request, 'books/comment_update.html', context)
+
+def comment_delete(request, comment_pk, thread_pk):
+    thread = get_object_or_404(Thread, pk=thread_pk)
+    comment = get_object_or_404(Comment, pk=comment_pk, thread=thread)
+
+    if request.user != comment.user:
+        return HttpResponseForbidden("니가 작성한 댓글 아님")
+
+    if request.method == 'POST':
+        comment.delete()
+        return redirect('threads:detail', thread.pk)
+
+    context = {'thread': thread, 'comment': comment}
+    return render(request, 'books/comment_delete.html', context)
