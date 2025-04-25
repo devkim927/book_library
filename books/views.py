@@ -3,7 +3,7 @@ import re
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Book, Thread, Category, Comment
-from .forms import BookForm, ThreadForm, CategoryForm, CommentForm
+from .serializers import BookListSerializer, CategoryListSerializer, CommentListSerializer, ThreadListSerializer
 from gtts import gTTS
 import requests  # AI API 호출을 위한 requests 모듈
 import openai
@@ -50,7 +50,7 @@ def sanitize_filename(filename):
 @login_required
 def create(request):
     if request.method == 'POST':
-        form = BookForm(request.POST, request.FILES)
+        form = BookListSerializer(request.POST, request.FILES)
         if form.is_valid():
             book = form.save(commit=False)
 
@@ -83,19 +83,19 @@ def create(request):
 
             return redirect('books:detail', pk=book.pk)
     else:
-        form = BookForm()
+        form = BookListSerializer()
     return render(request, 'books/create.html', {'form': form})
 
 
 def update(request, pk):
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
-        form = BookForm(request.POST, request.FILES, instance=book)
+        form = BookListSerializer(request.POST, request.FILES, instance=book)
         if form.is_valid():
             form.save()
             return redirect('books:detail', pk=book.pk)
     else:
-        form = BookForm(instance=book)
+        form = BookListSerializer(instance=book)
     return render(request, 'books/update.html', {'form': form, 'book': book})
 
 
@@ -147,14 +147,14 @@ def thread_create(request, book_pk):
     book = get_object_or_404(Book, pk=book_pk)
 
     if request.method == 'POST':
-        form = ThreadForm(request.POST, request.FILES)
+        form = ThreadListSerializer(request.POST, request.FILES)
         if form.is_valid():
             thread = form.save(commit=False)
             thread.book = book  # 직접 연결
             thread.save()
             return redirect('books:detail', book.pk)
     else:
-        form = ThreadForm()
+        form = ThreadListSerializer()
 
     context = {'form': form, 'book': book}
     return render(request, 'books/thread_create.html', context)
@@ -174,12 +174,12 @@ def thread_update(request, book_pk, thread_pk):
     thread = get_object_or_404(Thread, pk=thread_pk, book=book)
 
     if request.method == 'POST':
-        form = ThreadForm(request.POST, request.FILES, instance=thread)
+        form = ThreadListSerializer(request.POST, request.FILES, instance=thread)
         if form.is_valid():
             form.save()
             return redirect('books:thread_detail', book.pk, thread.pk)
     else:
-        form = ThreadForm(instance=thread)
+        form = ThreadListSerializer(instance=thread)
 
     context = {'form': form, 'book': book, 'thread': thread}
     return render(request, 'books/thread_update.html', context)
@@ -226,23 +226,23 @@ def like(request, book_pk, thread_pk):
 
     
 def comment_create(request, thread_pk):
-    comment = get_object_or_404(comment, pk=comment_pk)
+    thread = get_object_or_404(Thread, pk=thread_pk)
 
     if request.method == 'POST':
-        form = CommentForm(request.POST, request.FILES)
+        form = CommentListSerializer(request.POST, request.FILES)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.thread = thread
             comment.save()
             return redirect('theads:detail', thread.pk)
     else:
-        form = ThreadForm()
+        form = ThreadListSerializer()
 
     context = {'form': form, 'thread': thread}
     return render(request, 'books/comment_create.html', context)
 
 def comment_detail(request, comment_pk, thread_pk):
-    therad = get_object_or_404(Thread, pk=thread_pk)
+    thread = get_object_or_404(Thread, pk=thread_pk)
     comment = get_object_or_404(Comment, pk=comment_pk, thread=thread)
 
     context = {
@@ -256,12 +256,12 @@ def comment_update(request, comment_pk, thread_pk):
     comment = get_object_or_404(Comment, pk=comment_pk, thread=thread)
 
     if request.method == 'POST':
-        form = CommentForm(request.POST, request.FILES, instance=comment)
+        form = CommentListSerializer(request.POST, request.FILES, instance=comment)
         if form.is_valid():
             form.save()
             return redirect('books:comment_detail', comment.pk, thread.pk)
     else:
-        form = ThreadForm(instance=thread)
+        form = ThreadListSerializer(instance=thread)
 
     context = {'form': form, 'comment': comment, 'thread': thread}
     return render(request, 'books/comment_update.html', context)

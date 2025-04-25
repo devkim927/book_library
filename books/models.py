@@ -34,8 +34,6 @@ class Thread(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=100)
     
-    def __str__(self):
-        return self.title
 
 class Comment(models.Model):
     thread = models.ForeignKey("thread", on_delete=models.CASCADE, related_name='comment', default=1)
@@ -43,5 +41,3 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
     
-    def __str__(self):
-        return self.title
