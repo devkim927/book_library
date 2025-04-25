@@ -54,7 +54,7 @@ def thread_detail(request,thread_pk):
 
 
 @api_view(['POST'])
-def create_thread(request):
+def thread_create(request):
     serializer = CommentListSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         serializer.save()
@@ -62,7 +62,7 @@ def create_thread(request):
     return Response(serializer.errors, status=status.HTTP_400_REQUEST)
 
 @api_view(['POST'])
-def create_comment(request):
+def comment_create(request):
     serializer = CommentListSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         serializer.save()

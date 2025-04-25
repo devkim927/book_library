@@ -9,7 +9,6 @@ urlpatterns = [
     path("books/", views.index, name="index"),
     path("category/", views.category, name="category"),
     path("<int:pk>/", views.detail, name="detail"),
-    path("create/", views.create, name="create"),
     path('threads/',views.thread),
     path('threads/<int:thread_pk>/', views.thread_detail, name='thread_detail'),
     path('<int:book_pk>/threads/create/', views.thread_create, name='thread_create'),
