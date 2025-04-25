@@ -36,8 +36,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'accounts',
     'books',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -142,9 +142,3 @@ load_dotenv()  # .env 파일을 로드
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
-AUTH_USER_MODEL = 'accounts.User'
-
-# settings.py
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/profile/'  # 로그인 후 이동 경로
-LOGOUT_REDIRECT_URL = 'login'
