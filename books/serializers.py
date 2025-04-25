@@ -17,6 +17,13 @@ class CommentListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ThreadListSerializer(serializers.ModelSerializer):
+    class BookTitleeSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Book
+            fields = ('title',)
+  
+    book = BookTitleeSerializer(read_only=True)
+    
     class Meta:
         model = Thread
         fields = '__all__'

@@ -3,9 +3,7 @@ import re
 from django.conf import settings
 from .models import Book, Thread, Category, Comment
 from .serializers import BookListSerializer, CategoryListSerializer, CommentListSerializer, ThreadListSerializer
-from gtts import gTTS
 import requests  # AI API 호출을 위한 requests 모듈
-import openai
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from rest_framework.response import Response
@@ -31,11 +29,27 @@ def detail(request, pk):
     return Response(serializer.data)
 
 @api_view(['GET'])
-def thread(request, thread_pk, book_pk):
-    book = Book.objects.get(pk=book_pk)
-    thread = Thread.objects.get(pk=thread_pk)
-    serializer = ThreadListSerializer(thread)
+def thread(request):
+    thread = Thread.objects.all()
+    serializer = ThreadListSerializer(thread,many=True)
     return Response(serializer.data)
+
+@api_view(["GET","DELETE","PUT"])
+def thread_detail(request,thread_pk):
+    thread = Thread.objects.get(pk = thread_pk)
+    if request.method == "GET":
+        serializer = ThreadListSerializer(thread)
+        return Response(serializer.data)
+    
+    elif request.method == "DELETE":
+        thread.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    elif request.method == 'PUT':
+        serializer = ThreadListSerializer(thread, data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)
 
 
 
