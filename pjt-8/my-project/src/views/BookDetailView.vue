@@ -8,9 +8,9 @@
     <p><strong>카테고리:</strong> {{ getCategoryName(book.category) }}</p>
     <p><strong>설명:</strong> {{ book.description }}</p>
 
-    <router-link :to="`/threads/create?bookId=${book.id}`">
-      <button>이 도서에 대한 쓰레드 작성</button>
-    </router-link>
+  <router-link :to="`/threads/${book.id}/write`">
+    <button>이 도서에 대한 쓰레드 작성</button>
+  </router-link>
   </div>
 
   <div v-else>

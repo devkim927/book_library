@@ -32,6 +32,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useThreadStore } from '@/stores/threadStore'
 
 // 전역 상태처럼 사용할 수 있도록
 const threads = ref([]) // 사용자 작성으로 생성됨
@@ -45,7 +46,7 @@ const categories = ref([
 const selectedCategory = ref('전체')
 
 const router = useRouter()
-
+const threadStore = useThreadStore()
 // 예시: 작성된 스레드를 동적으로 추가하는 함수 (다른 컴포넌트에서 활용 가능)
 function addThread(newThread) {
   threads.value.push({
@@ -56,18 +57,13 @@ function addThread(newThread) {
 }
 
 const filteredThreads = computed(() => {
-  if (selectedCategory.value === '전체') {
-    return threads.value
-  }
-  return threads.value.filter(thread => thread.category === selectedCategory.value)
+  if (selectedCategory.value === '전체') return threadStore.threads
+  return threadStore.threads.filter(thread => thread.category === selectedCategory.value)
 })
 
-const goToDetail = (threadId) => {
-  router.push(`/threads/${threadId}`)
+function goToDetail(id) {
+  router.push(`/threads/${id}`)
 }
-
-// 다른 컴포넌트에서 addThread 사용 가능하게 export
-defineExpose({ addThread })
 </script>
 
 <style scoped>

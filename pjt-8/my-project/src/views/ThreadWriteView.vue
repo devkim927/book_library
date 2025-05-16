@@ -29,38 +29,54 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { useThreadStore } from '@/stores/threadStore'
 import booksData from '@/assets/books.json'
 import categoriesData from '@/assets/categories.json'
 
+const router = useRouter()
 const route = useRoute()
-const bookId = parseInt(route.params.bookId)
+const threadStore = useThreadStore()
 
-const book = ref(null)
 const title = ref('')
 const content = ref('')
+const category = ref('')
+const book = ref(null)
 const categories = ref([])
 
+const bookId = parseInt(route.params.bookId)
+
 onMounted(() => {
+  const foundBook = booksData.find(b => b.pk === bookId)
+  if (foundBook) {
+    book.value = {
+      id: foundBook.pk,
+      ...foundBook.fields
+    }
+  }
+
   categories.value = categoriesData
-  book.value = booksData.find(b => b.id === bookId)
 })
 
-const getCategoryName = (id) => {
+function getCategoryName(id) {
   const category = categories.value.find(c => c.pk === id)
   return category ? category.fields.name : '기타'
 }
 
-const submitThread = () => {
-  // 여기서 실제 저장 로직 또는 API 호출 가능
-  console.log('쓰레드 등록:', {
-    bookId,
+function submitThread() {
+  if (!title.value || !content.value) {
+    alert('제목과 내용을 입력해주세요.')
+    return
+  }
+
+  threadStore.addThread({
     title: title.value,
     content: content.value,
+    category: category.value,
+    bookId: bookId
   })
 
-  alert('쓰레드가 등록되었습니다!')
-  // 이후 라우터 이동 등 추가 가능
+  router.push('/threads')
 }
 </script>
 
