@@ -24,7 +24,7 @@ const router = createRouter({
       component: ThreadDetailView },
     {
       path: '/threads/:bookId/write',
-      name: ' ThreadWriteView',
+      name: 'ThreadWriteView',
       component:  ThreadWriteView,
     },
     {

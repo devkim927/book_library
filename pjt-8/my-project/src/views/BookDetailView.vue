@@ -1,94 +1,68 @@
 <template>
-<div v-if="book" class="book-detail">
+  <div v-if="book">
     <h1>{{ book.title }}</h1>
     <p><strong>저자:</strong> {{ book.author }}</p>
     <p><strong>출판사:</strong> {{ book.publisher }}</p>
-    <p><strong>출판일:</strong> {{ book.publishedDate }}</p>
+    <p><strong>출판일:</strong> {{ book.pub_date }}</p>
     <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+    <p><strong>카테고리:</strong> {{ getCategoryName(book.category) }}</p>
+    <p><strong>설명:</strong> {{ book.description }}</p>
 
-    <!-- <h3>주변 도서관 정보</h3>
-    <div id="map" class="map-container"></div>
+    <router-link :to="`/threads/create?bookId=${book.id}`">
+      <button>이 도서에 대한 쓰레드 작성</button>
+    </router-link>
+  </div>
 
-    <ul v-if="libraries.length">
-    <li v-for="library in libraries" :key="library.place_id">
-        {{ library.name }} - {{ library.vicinity }}
-    </li>
-    </ul> -->
-</div>
-<div v-else>
-    <p>도서 정보를 불러오는 중...</p>
-</div>
+  <div v-else>
+    <p>도서를 찾을 수 없습니다.</p>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import booksData from '@/assets/books.json';
-import { Loader } from '@googlemaps/js-api-loader';
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import booksData from '@/assets/books.json'
+import categoriesData from '@/assets/categories.json'
 
-const route = useRoute();
-const book = ref(null);
-const userLocation = ref(null);
-const map = ref(null);
-const libraries = ref([]);
+const route = useRoute()
+const bookId = parseInt(route.params.bookId)
+
+const book = ref(null)
+const categories = ref([])
 
 onMounted(() => {
-  const bookId = route.params.bookId;
-  book.value = booksData.find(b => b.id === bookId);
+  const rawBook = booksData.find(b => b.pk === bookId)
+  if (rawBook) {
+    book.value = {
+      id: rawBook.pk,
+      title: rawBook.fields.title,
+      author: rawBook.fields.author,
+      publisher: rawBook.fields.publisher,
+      pub_date: rawBook.fields.pub_date,
+      isbn: rawBook.fields.isbn,
+      category: rawBook.fields.category,
+      description: rawBook.fields.description
+    }
+  }
+
+  categories.value = categoriesData
 })
-//   // 사용자 위치 가져오기
-//   if (navigator.geolocation) {
-//     navigator.geolocation.getCurrentPosition((position) => {
-//       userLocation.value = {
-//         lat: position.coords.latitude,
-//         lng: position.coords.longitude,
-//       };
-//       initializeMap();
-//     });
-//   }
-// });
 
-// // Google Maps 초기화
-// const initializeMap = async () => {
-//   const loader = new Loader({
-//     apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-//     version: 'weekly',
-//   });
-
-//   await loader.load();
-
-//   const google = window.google;
-//   map.value = new google.maps.Map(document.getElementById('map'), {
-//     center: userLocation.value,
-//     zoom: 15,
-//   });
-
-//   searchLibraries();
-// };
-
-// // 주변 도서관 검색
-// const searchLibraries = () => {
-//   const service = new window.google.maps.places.PlacesService(map.value);
-//   const request = {
-//     location: userLocation.value,
-//     radius: 5000,
-//     type: 'library',
-//   };
-
-//   service.nearbySearch(request, (results, status) => {
-//     if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-//       libraries.value = results;
-//     }
-//   });
-// };
+const getCategoryName = (id) => {
+  const cat = categories.value.find(c => c.pk === id)
+  return cat ? cat.fields.name : '기타'
+}
 </script>
 
-
 <style scoped>
-.map-container {
-  width: 100%;
-  height: 400px;
+button {
   margin-top: 20px;
-  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>

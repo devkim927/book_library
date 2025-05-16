@@ -1,69 +1,73 @@
 <template>
-  <div class="books-container">
+  <div>
     <h1>도서 목록</h1>
 
-    <!-- 카테고리 선택 -->
-    <div class="category-filter">
-      <label for="category">카테고리:</label>
-      <select id="category" v-model="selectedCategory">
-        <option value="전체">전체</option>
-        <option v-for="category in categories" :key="category.id" :value="category.name">
-          {{ category.name }}
-        </option>
-      </select>
+    <!-- 카테고리 필터 -->
+    <div>
+      <button
+        v-for="cat in categories"
+        :key="cat.pk"
+        @click="selectedCategory = cat.pk"
+        :class="{ active: selectedCategory === cat.pk }"
+      >
+        {{ cat.fields.name }}
+      </button>
     </div>
 
     <!-- 도서 목록 -->
-    <div class="books-list">
-      <div v-for="book in filteredBooks" :key="book.id" class="book-card">
-        <h3>{{ book.title }}</h3>
-        <p>{{ book.author }} | {{ book.publisher }}</p>
-        <p>{{ book.publishedDate }}</p>
+    <div>
+      <div
+        v-for="book in filteredBooks"
+        :key="book.pk"
+        @click="goToBookDetail(book.pk)"
+        style="cursor: pointer; border: 1px solid #ccc; padding: 10px; margin: 10px 0;"
+      >
+        <h3>{{ book.fields.title }}</h3>
+        <p>저자: {{ book.fields.author }}</p>
+        <p>카테고리: {{ getCategoryName(book.fields.category) }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import booksData from '@/assets/books.json';
-import categoriesData from '@/assets/categories.json';
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import booksData from '@/assets/books.json'
+import categoriesData from '@/assets/categories.json'
 
-const books = ref([]);
-const categories = ref(categoriesData);
-const selectedCategory = ref('전체');
+const router = useRouter()
+
+const books = ref([])
+const categories = ref([])
+const selectedCategory = ref(0) // 기본: '전체' 카테고리
 
 onMounted(() => {
-  books.value = booksData;
-});
+  books.value = booksData
+  categories.value = categoriesData
+})
 
-// 카테고리 필터링
 const filteredBooks = computed(() => {
-  if (selectedCategory.value === '전체') {
-    return books.value;
+  if (selectedCategory.value === 0) {
+    return books.value
   }
-  return books.value.filter(book => book.category === selectedCategory.value);
-});
+  return books.value.filter(book => book.fields.category === selectedCategory.value)
+})
+
+const getCategoryName = (id) => {
+  const cat = categories.value.find(c => c.pk === id)
+  return cat ? cat.fields.name : '기타'
+}
+
+// 📌 클릭 시 상세 페이지 이동 함수
+const goToBookDetail = (bookId) => {
+  router.push(`/books/${bookId}`)
+}
 </script>
 
 <style scoped>
-.books-container {
-  padding: 20px;
-}
-
-.category-filter {
-  margin-bottom: 20px;
-}
-
-.books-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.book-card {
-  border: 1px solid #ccc;
-  padding: 15px;
-  border-radius: 8px;
+.active {
+  font-weight: bold;
+  text-decoration: underline;
 }
 </style>

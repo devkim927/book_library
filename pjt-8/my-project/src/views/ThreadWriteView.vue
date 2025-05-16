@@ -1,97 +1,104 @@
 <template>
-  <div class="thread-write-container">
-    <h1>AI 피드백 전후 비교</h1>
+  <div class="thread-write">
+    <h1>쓰레드 작성</h1>
 
-    <!-- 입력 폼 -->
-    <label>제목:</label>
-    <input v-model="title" type="text" placeholder="제목을 입력하세요" />
-
-    <label>내용:</label>
-    <textarea v-model="content" placeholder="내용을 입력하세요"></textarea>
-
-    <button @click="getAiFeedback">AI 피드백 요청</button>
-
-    <!-- AI 피드백 진행 상태 -->
-    <div v-if="isLoading">AI 피드백 진행 중...</div>
-
-    <!-- AI 피드백 결과 -->
-    <div v-if="aiFeedback" class="feedback-container">
-      <h3>AI 피드백 결과</h3>
-      <p>{{ aiFeedback }}</p>
+    <!-- 도서 정보 카드 -->
+    <div v-if="book" class="book-card">
+      <h2>{{ book.title }}</h2>
+      <p><strong>저자:</strong> {{ book.author }}</p>
+      <p><strong>카테고리:</strong> {{ getCategoryName(book.category) }}</p>
+    </div>
+    <div v-else>
+      <p>도서 정보를 불러오는 중입니다...</p>
     </div>
 
-    <!-- AI 변경점 비교 -->
-    <div v-if="diffResult.length" class="diff-container">
-      <h3>AI 수정 전후 비교</h3>
-      <p>
-        <span v-for="part in diffResult" :key="part.value"
-              :class="{ added: part.added, removed: part.removed }">
-          {{ part.value }}
-        </span>
-      </p>
-    </div>
+    <!-- 쓰레드 작성 폼 -->
+    <form @submit.prevent="submitThread" class="thread-form">
+      <label>
+        제목:
+        <input v-model="title" type="text" required />
+      </label>
+      <label>
+        내용:
+        <textarea v-model="content" required rows="6" />
+      </label>
+      <button type="submit">등록하기</button>
+    </form>
   </div>
 </template>
+
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
-import * as Diff from 'diff';
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import booksData from '@/assets/books.json'
+import categoriesData from '@/assets/categories.json'
 
-const title = ref('');
-const content = ref('');
-const aiFeedback = ref(null);
-const diffResult = ref([]);
-const isLoading = ref(false);
+const route = useRoute()
+const bookId = parseInt(route.params.bookId)
 
-// OpenAI API 호출
-const getAiFeedback = async () => {
-  isLoading.value = true;
-  
-  try {
-    const response = await axios.post('https://api.openai.com/v1/completions', {
-      model: 'text-davinci-003',
-      prompt: `다음 글을 더 공손하고 유창하게 수정해 주세요:\n\n"${content.value}"`,
-      max_tokens: 200,
-      temperature: 0.7,
-    }, {
-      headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
+const book = ref(null)
+const title = ref('')
+const content = ref('')
+const categories = ref([])
 
-    aiFeedback.value = response.data.choices[0].text.trim();
+onMounted(() => {
+  categories.value = categoriesData
+  book.value = booksData.find(b => b.id === bookId)
+})
 
-    // Diff 비교
-    diffResult.value = Diff.diffWords(content.value, aiFeedback.value);
-  } catch (error) {
-    console.error('AI 피드백 요청 실패:', error);
-  } finally {
-    isLoading.value = false;
-  }
-};
+const getCategoryName = (id) => {
+  const category = categories.value.find(c => c.pk === id)
+  return category ? category.fields.name : '기타'
+}
+
+const submitThread = () => {
+  // 여기서 실제 저장 로직 또는 API 호출 가능
+  console.log('쓰레드 등록:', {
+    bookId,
+    title: title.value,
+    content: content.value,
+  })
+
+  alert('쓰레드가 등록되었습니다!')
+  // 이후 라우터 이동 등 추가 가능
+}
 </script>
 
-
 <style scoped>
-.thread-write-container {
+.thread-write {
+  max-width: 600px;
+  margin: auto;
   padding: 20px;
 }
 
-.feedback-container, .diff-container {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
+.book-card {
+  background-color: #f8f8f8;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
 }
 
-.added {
-  background-color: #d4f5d4;
+.thread-form label {
+  display: block;
+  margin-bottom: 16px;
+  font-weight: 600;
 }
 
-.removed {
-  background-color: #f5d4d4;
-  text-decoration: line-through;
+.thread-form input,
+.thread-form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  box-sizing: border-box;
+}
+
+.thread-form button {
+  padding: 10px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 </style>
